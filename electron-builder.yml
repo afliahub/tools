@@ -2,7 +2,9 @@ appId: com.electron.app
 productName: Aflia Tools
 directories:
   buildResources: build
+  output: dist
 files:
+  - 'out/**/*'
   - 'dist/**/*'
   - 'node_modules/**/*'
   - 'package.json'
