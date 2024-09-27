@@ -1,10 +1,10 @@
 {
   "name": "afliahubtools",
   "version": "1.0.0",
-  "description": "An Electron application with Vue and TypeScript",
+  "description": "AfliaHub is a rich and easy-to-use toolbox!",
   "main": "./out/main/index.js",
-  "author": "example.com",
-  "homepage": "https://electron-vite.org",
+  "author": "aflia.com",
+  "homepage": "https://hub.aflia.com",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts,.vue --fix",
