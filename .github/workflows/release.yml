@@ -78,19 +78,19 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Download Release Assets from macOS
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: release-mac
           path: dist/mac/
 
       - name: Download Release Assets from Windows
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: release-win
           path: dist/win/
 
       - name: Download Release Assets from Linux
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: release-linux
           path: dist/linux/
