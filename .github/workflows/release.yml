@@ -117,11 +117,11 @@ jobs:
           name: release-win
           path: dist/win/
 
-      - name: Download Release Assets from Linux
-        uses: actions/download-artifact@v3
-        with:
-          name: release-linux
-          path: dist/linux/
+#     - name: Download Release Assets from Linux
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: release-linux
+#          path: dist/linux/
 
       - name: Publish to GitHub Releases
         uses: softprops/action-gh-release@v1
