@@ -143,7 +143,6 @@ jobs:
       - name: Filter and move required files
         run: |
           mkdir -p dist/release
-          mv dist/*.zip dist/release/
           mv dist/*.exe dist/release/
 
       - name: Publish to GitHub Releases
