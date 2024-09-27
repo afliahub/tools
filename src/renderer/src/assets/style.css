@@ -1,0 +1,9 @@
+/* src/assets/styles.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+textarea {
+    /* 其他样式 */
+    height: auto; /* 确保不覆盖 Tailwind 的高度 */
+}

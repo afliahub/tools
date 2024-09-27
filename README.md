@@ -1,6 +1,8 @@
-# afliahubtools
+# AfliaHub/Tools
 
-An Electron application with Vue and TypeScript
+`AfliaHub is a rich and easy-to-use toolbox!`
+
+- JSON Formatter
 
 ## Recommended IDE Setup
 
@@ -32,3 +34,7 @@ $ npm run build:mac
 # For Linux
 $ npm run build:linux
 ```
+
+
+## Preview
+![preview](./screenshots/main.png)
