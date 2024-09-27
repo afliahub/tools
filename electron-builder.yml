@@ -28,6 +28,19 @@ mac:
   notarize: false
 dmg:
   artifactName: ${name}-${version}.${ext}
+  background: "path/to/background.png"
+  icon: "path/to/icon.icns"
+  iconSize: 80
+  contents:
+    - x: 130
+      y: 220
+      type: file
+      path: "{{productName}}.app"
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications
+  license: "/dmg-license.txt" 
 linux:
   target:
     - AppImage
