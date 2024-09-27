@@ -6,9 +6,8 @@ on:
       - 'v*'
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
+  build-mac:
+    runs-on: macos-latest
     strategy:
       matrix:
         node-version: [20.x]
@@ -28,28 +27,100 @@ jobs:
       - name: Build the application
         run: npm run build
 
-      - name: Build Electron application
-        run: npm run build:mac && npm run build:win && npm run build:linux
+      - name: Build Electron application for macOS
+        run: npm run build:mac
 
       - name: Upload Release Assets
         uses: actions/upload-artifact@v3
         with:
-          name: release
+          name: release-mac
+          path: dist/
+
+  build-win:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build the application
+        run: npm run build
+
+      - name: Build Electron application for Windows
+        run: npm run build:win
+
+      - name: Upload Release Assets
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-win
+          path: dist/
+
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build the application
+        run: npm run build
+
+      - name: Build Electron application for Linux
+        run: npm run build:linux
+
+      - name: Upload Release Assets
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-linux
           path: dist/
 
   publish:
-    needs: build
+    needs: [build-mac, build-win, build-linux]
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Download Release Assets
+      - name: Download Release Assets from macOS
         uses: actions/download-artifact@v2
         with:
-          name: release
-          path: dist/
+          name: release-mac
+          path: dist/mac/
+
+      - name: Download Release Assets from Windows
+        uses: actions/download-artifact@v2
+        with:
+          name: release-win
+          path: dist/win/
+
+      - name: Download Release Assets from Linux
+        uses: actions/download-artifact@v2
+        with:
+          name: release-linux
+          path: dist/linux/
 
       - name: Publish to GitHub Releases
         uses: softprops/action-gh-release@v1
