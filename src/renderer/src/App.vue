@@ -13,15 +13,13 @@
     <div v-if="menuVisible" class="absolute bottom-24 left-5 flex flex-col space-y-1">
       <button 
         @click="goToHome" 
-        :class="{'bg-blue-300': currentComponent === 'home', 'bg-gray-200 text-gray-800': currentComponent !== 'home'}"
-        class="text-gray-800 rounded p-1 shadow-md hover:bg-gray-300 transition text-left"
+        class="bg-gray-200 text-gray-800 rounded p-1 shadow-md hover:bg-gray-300 transition text-left"
       >
         Home
       </button>
       <button 
         @click="goToJsonFormatter" 
-        :class="{'bg-blue-300': currentComponent === 'jsonFormatter', 'bg-gray-200 text-gray-800': currentComponent !== 'jsonFormatter'}"
-        class="text-gray-800 rounded p-1 shadow-md hover:bg-gray-300 transition text-left"
+        class="bg-gray-200 text-gray-800 rounded p-1 shadow-md hover:bg-gray-300 transition text-left"
       >
         JSON Formatter
       </button>
