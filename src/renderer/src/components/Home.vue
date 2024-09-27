@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-center justify-center h-full">
-    <h2 class="text-3xl font-bold">Welcome to the JSON Formatter App!</h2>
+    <h2 class="text-3xl font-bold">Welcome to the AfliaHub/Tools Box!</h2>
   </div>
 </template>
 
