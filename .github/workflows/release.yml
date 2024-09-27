@@ -97,8 +97,8 @@ jobs:
 #            name: release-linux
 #            path: dist/linux
 
-  publish:
-    needs: [build-mac, build-win]
+  publish-mac:
+    needs: build-mac
     runs-on: ubuntu-latest
 
     steps:
@@ -109,13 +109,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: release-mac
-          path: dist/mac/
-
-      - name: Download Release Assets from Windows
-        uses: actions/download-artifact@v3
-        with:
-          name: release-win
-          path: dist/win/
+          path: dist/
 
       - name: List files for debugging
         run: ls -R dist/
@@ -123,6 +117,30 @@ jobs:
       - name: Publish to GitHub Releases
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/**/*
+          files: dist/**/*_mac
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+
+  publish-win:
+    needs: build-win
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Download Release Assets from Windows
+        uses: actions/download-artifact@v3
+        with:
+          name: release-win
+          path: dist/
+
+      - name: List files for debugging
+        run: ls -R dist/
+
+      - name: Publish to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/**/*_win
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
