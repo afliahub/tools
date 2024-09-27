@@ -118,8 +118,6 @@ jobs:
           mkdir -p dist/release
           mv dist/*.dmg dist/release/
           mv dist/*.zip dist/release/
-          mv dist/*.exe dist/release/
-          mv dist/*.yml dist/release/
 
       - name: Publish to GitHub Releases
         uses: softprops/action-gh-release@v2
@@ -145,10 +143,8 @@ jobs:
       - name: Filter and move required files
         run: |
           mkdir -p dist/release
-          mv dist/*.dmg dist/release/
           mv dist/*.zip dist/release/
           mv dist/*.exe dist/release/
-          mv dist/*.yml dist/release/
 
       - name: Publish to GitHub Releases
         uses: softprops/action-gh-release@v2
