@@ -125,7 +125,7 @@ jobs:
           mkdir -p dist/release
           mv dist/mac/*.dmg dist/release/
           mv dist/mac/*.zip dist/release/
-          mv dist/win/*.ext dist/release/
+          mv dist/win/*.exe dist/release/
 
       - name: Publish to GitHub Releases
         uses: softprops/action-gh-release@v2
