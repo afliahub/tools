@@ -17,8 +17,7 @@
     "postinstall": "electron-builder install-app-deps && if [ \"$OSTYPE\" = \"darwin*\" ]; then npm install dmg-license; fi",
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
-    "build:mac": "npm run build && electron-builder --mac",
-    "build:linux": "npm run build && electron-builder --linux"
+    "build:mac": "npm run build && electron-builder --mac" 
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.0",
