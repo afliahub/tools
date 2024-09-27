@@ -40,7 +40,7 @@ dmg:
       y: 220
       type: link
       path: /Applications
-  license: "/dmg-license.txt" 
+  license: "dmg-license.txt" 
 linux:
   target:
     - AppImage
