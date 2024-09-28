@@ -1,5 +1,5 @@
 {
-  "name": "afliahubtools",
+  "name": "afliatools",
   "version": "1.0.0",
   "description": "AfliaHub is a rich and easy-to-use toolbox!",
   "main": "./out/main/index.js",
