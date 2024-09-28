@@ -140,10 +140,33 @@ jobs:
       - name: List files for debugging
         run: ls -R dist/
 
+      - name: Generate changelog
+        id: generate_changelog
+        run: |
+          npx conventional-changelog-cli -p angular -i CHANGELOG.md -s
+          CHANGELOG=$(cat CHANGELOG.md)
+          echo "CHANGELOG<<EOF" >> $GITHUB_ENV
+          echo "$CHANGELOG" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Get contributors
+        id: get_contributors
+        run: |
+          CONTRIBUTORS=$(git shortlog -sne HEAD | awk '{\$1=""; print substr(\$0,2)}')
+          echo "CONTRIBUTORS<<EOF" >> $GITHUB_ENV
+          echo "$CONTRIBUTORS" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
       - name: Publish to GitHub Releases
         uses: softprops/action-gh-release@v2
         with:
 #          files: dist/release/**/*
           files: dist/release/*
+          body: |
+            ## Changelog
+            ${{ env.CHANGELOG }}
+
+            ## Contributors
+            ${{ env.CONTRIBUTORS }}
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
