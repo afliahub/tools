@@ -34,7 +34,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: release-mac
-          path: dist/
+          path: |
+            dist/**/*.dmg
+            dist/**/*.zip
           if-no-files-found: ignore
 
   build-win:
@@ -67,7 +69,8 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: release-win
-          path: dist/
+          path: |
+            dist/**/*.exe
           if-no-files-found: ignore
 
 #  build-linux:
@@ -112,20 +115,13 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: release-mac
-          path: dist/mac
+          path: dist/release
 
       - name: Download Release Assets from Windows
         uses: actions/download-artifact@v3
         with:
           name: release-win
-          path: dist/win
-
-      - name: Filter and move required files
-        run: |
-          mkdir -p dist/release
-          mv dist/mac/*.dmg dist/release/
-          mv dist/mac/*.zip dist/release/
-          mv dist/win/*.exe dist/release/
+          path: dist/release
 
       - name: Publish to GitHub Releases
         uses: softprops/action-gh-release@v2
