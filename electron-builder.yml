@@ -1,5 +1,5 @@
 appId: com.electron.app
-productName: Aflia Tools
+productName: AfliaHub-Tools
 directories:
   buildResources: build
   output: dist
@@ -17,7 +17,7 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: ${name}
+  executableName: AfliaHub-Tools 
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
