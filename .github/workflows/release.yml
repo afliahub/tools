@@ -30,10 +30,14 @@ jobs:
       - name: Build Electron application for macOS
         run: npm run build:mac
 
+      - name: List files for debugging
+        run: ls -R dist/
+
       - name: Upload Release Assets
         uses: actions/upload-artifact@v3
         with:
           name: release-mac
+          
           path: |
             dist/**/*.dmg
             dist/**/*.zip
@@ -65,6 +69,9 @@ jobs:
       - name: Build Electron application for Windows
         run: npm run build:win
 
+      - name: List files for debugging
+        run: ls -R dist/
+        
       - name: Upload Release Assets
         uses: actions/upload-artifact@v3
         with:
