@@ -30,6 +30,10 @@ jobs:
       - name: Build Electron application for macOS
         run: npm run build:mac
 
+      - name: Extract version from tag
+        id: extract_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
       - name: List files for debugging
         run: ls -R dist/
 
@@ -37,10 +41,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: release-mac
-          
           path: |
-            dist/**/*.dmg
-            dist/**/*.zip
+            dist/**/*${{ env.VERSION }}*.dmg
+            dist/**/*${{ env.VERSION }}*.zip
           if-no-files-found: ignore
 
   build-win:
@@ -71,13 +74,17 @@ jobs:
 
       - name: List files for debugging
         run: ls -R dist/
-        
+
+      - name: Extract version from tag
+        id: extract_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
       - name: Upload Release Assets
         uses: actions/upload-artifact@v3
         with:
           name: release-win
           path: |
-            dist/**/*.exe
+            dist/**/*${{ env.VERSION }}*.exe
           if-no-files-found: ignore
 
 #  build-linux:

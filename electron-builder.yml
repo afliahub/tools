@@ -17,7 +17,7 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: afliahubtools
+  executableName: ${name}
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
