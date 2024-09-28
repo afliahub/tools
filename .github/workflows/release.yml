@@ -152,7 +152,7 @@ jobs:
       - name: Get contributors
         id: get_contributors
         run: |
-          CONTRIBUTORS=$(git shortlog -sne HEAD | awk '{\$1=""; print substr(\$0,2)}')
+          CONTRIBUTORS=$(git shortlog -sne HEAD | awk '{print substr(\$0, index(\$0,\$2))}')
           echo "CONTRIBUTORS<<EOF" >> $GITHUB_ENV
           echo "$CONTRIBUTORS" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
