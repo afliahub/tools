@@ -31,13 +31,13 @@ jobs:
           version=${latest_tag#v}
           echo "Latest tag is $latest_tag"
           echo "Version without 'v': $version"
-          echo "version=$version" >> $GITHUB_ENV
+          echo "VERSION=$version" >> $GITHUB_ENV
           
       - name: Build the application
         run: npm run build
 
       - name: Build Electron application for macOS
-        run: npm run build:mac
+        run: npm run build:mac -- --config.extraMetadata.version=${{ env.VERSION }}
 
       - name: List files for debugging
         run: ls -R dist/
@@ -83,10 +83,10 @@ jobs:
           version=${latest_tag#v}
           echo "Latest tag is $latest_tag"
           echo "Version without 'v': $version"
-          echo "version=$version" >> $GITHUB_ENV
+          echo "VERSION=$version" >> $GITHUB_ENV
           
       - name: Build Electron application for Windows
-        run: npm run build:win
+        run: npm run build:win -- --config.extraMetadata.version=${{ env.VERSION }}
 
       - name: List files for debugging
         run: ls -R dist/
