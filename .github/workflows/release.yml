@@ -24,12 +24,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build the application
-        run: npm run build
-
-      - name: Build Electron application for macOS
-        run: npm run build:mac
-
       - name: Extract version from latest tag
         id: extract_latest_version
         run: |
@@ -38,6 +32,12 @@ jobs:
           echo "Latest tag is $latest_tag"
           echo "Version without 'v': $version"
           echo "VERSION=$version" >> $GITHUB_ENV
+          
+      - name: Build the application
+        run: npm run build
+
+      - name: Build Electron application for macOS
+        run: npm run build:mac
 
       - name: List files for debugging
         run: ls -R dist/
@@ -74,13 +74,7 @@ jobs:
       - name: Build the application
         run: npm run build
 
-      - name: Build Electron application for Windows
-        run: npm run build:win
-
-      - name: List files for debugging
-        run: ls -R dist/
-
-      - name: Extract version from latest tag
+    - name: Extract version from latest tag
         id: extract_latest_version
         shell: bash
         run: |
@@ -89,6 +83,12 @@ jobs:
           echo "Latest tag is $latest_tag"
           echo "Version without 'v': $version"
           echo "VERSION=$version" >> $GITHUB_ENV
+          
+      - name: Build Electron application for Windows
+        run: npm run build:win
+
+      - name: List files for debugging
+        run: ls -R dist/
 
       - name: Upload Release Assets
         uses: actions/upload-artifact@v3
