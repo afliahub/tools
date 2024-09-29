@@ -30,9 +30,14 @@ jobs:
       - name: Build Electron application for macOS
         run: npm run build:mac
 
-      - name: Extract version from tag
-        id: extract_version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+      - name: Extract version from latest tag
+        id: extract_latest_version
+        run: |
+          latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+          version=${latest_tag#v}
+          echo "Latest tag is $latest_tag"
+          echo "Version without 'v': $version"
+          echo "VERSION=$version" >> $GITHUB_ENV
 
       - name: List files for debugging
         run: ls -R dist/
@@ -77,6 +82,7 @@ jobs:
 
       - name: Extract version from latest tag
         id: extract_latest_version
+        shell: bash
         run: |
           latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
           version=${latest_tag#v}
