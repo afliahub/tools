@@ -10,7 +10,7 @@
     </button>
 
     <!-- 树形菜单 -->
-    <div v-if="menuVisible" class="absolute bottom-24 left-5 flex flex-col space-y-1">
+    <div v-if="menuVisible" class="absolute bottom-24 left-5 flex flex-col space-y-1 z-50 ">
       <button 
         @click="goToHome" 
         class="bg-gray-200 text-gray-800 rounded p-1 shadow-md hover:bg-gray-300 transition text-left"
