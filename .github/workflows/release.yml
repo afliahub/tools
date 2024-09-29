@@ -31,7 +31,7 @@ jobs:
           version=${latest_tag#v}
           echo "Latest tag is $latest_tag"
           echo "Version without 'v': $version"
-          echo "VERSION=$version" >> $GITHUB_ENV
+          echo "version=$version" >> $GITHUB_ENV
           
       - name: Build the application
         run: npm run build
@@ -83,7 +83,7 @@ jobs:
           version=${latest_tag#v}
           echo "Latest tag is $latest_tag"
           echo "Version without 'v': $version"
-          echo "VERSION=$version" >> $GITHUB_ENV
+          echo "version=$version" >> $GITHUB_ENV
           
       - name: Build Electron application for Windows
         run: npm run build:win
