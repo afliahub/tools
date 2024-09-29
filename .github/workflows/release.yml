@@ -174,10 +174,11 @@ jobs:
       - name: Generate changelog
         id: generate_changelog
         run: |
-          npx conventional-changelog-cli -p angular -i CHANGELOG.md -s --release-as ${{ env.VERSION }}
+          DATE=$(date +"%Y%m%d")
           CHANGELOG=$(cat CHANGELOG.md)
+          NEW_CHANGELOG="Date: $DATE\n\n$CHANGELOG"
           echo "CHANGELOG<<EOF" >> $GITHUB_ENV
-          echo "$CHANGELOG" >> $GITHUB_ENV
+          echo "$NEW_CHANGELOG" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
       - name: Publish to GitHub Releases
