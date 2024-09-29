@@ -1,15 +1,15 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, screen } from 'electron' // Added screen import
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
 function createWindow(): void {
   // 获取屏幕的尺寸
-  const { width, height } = require('electron').screen.getPrimaryDisplay().workAreaSize;
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize; // Updated to use imported screen
 
-  // 计算窗口的宽高为屏幕的一半
-  const windowWidth = Math.floor(width / 2);
-  const windowHeight = Math.floor(height / 2);
+  // 计算窗口的宽高为屏幕的80%
+  const windowWidth = Math.floor(width * 0.8); // Changed to 80%
+  const windowHeight = Math.floor(height * 0.8); // Changed to 80%
 
   // 计算顶部和底部的间距
   const topMargin = Math.floor((height - windowHeight) / 2);
@@ -54,9 +54,6 @@ function createWindow(): void {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
 
- 
-
-
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron');
 
@@ -77,9 +74,6 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
-
-  
-
 
 });
 
