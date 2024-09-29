@@ -4,7 +4,7 @@
     <!-- 悬浮按钮 -->
     <button 
       @click="toggleMenu" 
-      class="absolute bottom-10 left-5 bg-blue-500 text-white rounded-full p-2 shadow-lg hover:bg-blue-600 transition"
+      class="absolute bottom-10 left-5 bg-blue-500 text-white rounded-full p-2 shadow-lg hover:bg-blue-600 transition z-50"
     >
       +
     </button>

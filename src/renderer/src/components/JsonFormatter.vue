@@ -6,12 +6,21 @@
     </div>
     
     <div class="flex flex-row flex-grow">
-      <textarea
-        v-model="inputJson"
-        @input="formatJson"
-        class="w-1/2 h-full p-2 border border-gray-300 rounded resize-none" 
-        placeholder="Paste your JSON..."
-      ></textarea>
+      <div class="w-1/2 h-full p-2 border border-gray-300 rounded relative">
+        <textarea
+          v-model="inputJson"
+          @input="onInput"
+          class="w-full h-full p-2  rounded resize-none" 
+          placeholder="Paste your JSON..."
+        ></textarea>
+        <!-- 查看历史按钮 -->
+        <button 
+          @click="toggleHistory" 
+          class="absolute top-2 right-2 bg-gray-500 text-white px-2 py-1 rounded z-30" 
+        >
+          View History
+        </button>
+      </div> 
       <div 
         class="w-1/2 h-full p-2 border border-gray-300 rounded bg-gray-100 overflow-hidden ml-1 relative"
         @mouseenter="showCopyButton = true" 
@@ -54,11 +63,39 @@
         </div>
       </div>
     </div>
+
+    <!-- 历史记录列表 -->
+    <div v-if="showHistory" ref="historyPopup" :style="{ maxHeight: `${maxHistoryHeight}px`, width: '80%' }" class="absolute top-16 left-1/2 transform -translate-x-1/2 bg-white border border-gray-300 rounded p-2 overflow-y-auto z-40">
+      <div v-if="history.length > 10" class="mb-2">
+        <input 
+          v-model="searchQuery" 
+          @input="filterHistory" 
+          type="text" 
+          placeholder="Search history..." 
+          class="w-full p-2 border border-gray-300 rounded"
+        />
+      </div>
+      <ul>
+        <li v-for="(item, index) in filteredHistory" :key="index" class="flex justify-between items-center cursor-pointer hover:bg-gray-200 p-1">
+          <span class="flex-grow" @click="selectHistory(item)">{{ item.json.slice(0, 100) }}{{ item.json.length > 80 ? '...' : '' }}</span>
+          <button @click="removeHistory(index)" class="ml-2 text-red-500 hover:text-red-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H3a1 1 0 100 2h1v9a2 2 0 002 2h8a2 2 0 002-2V6h1a1 1 0 100-2h-2V3a1 1 0 00-1-1H6zm3 3a1 1 0 112 0v1h-2V5zM5 8a1 1 0 011-1h8a1 1 0 011 1v7a1 1 0 01-1 1H6a1 1 0 01-1-1V8z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
+
+// Helper function to generate a unique identifier
+const generateUniqueId = (json: string) => {
+  return btoa(json.replace(/\s+/g, '')); // Base64 encode the JSON string without spaces
+};
 
 const inputJson = ref('');
 const formattedJson = ref('');
@@ -66,6 +103,37 @@ const errorMessage = ref('');
 const showSchema = ref(false); // 控制显示 JSON Schema
 const showCopyButton = ref(false); // 控制复制按钮的显示
 const showCopySuccess = ref(false); // 控制复制成功提示的显示
+const showHistory = ref(false); // 控制历史记录的显示
+const history = ref([]); // 历史记录
+const searchQuery = ref(''); // 搜索查询
+const filteredHistory = ref([]); // 过滤后的历史记录
+const maxHistoryHeight = ref(0); // 历史记录列表的最大高度
+let inputTimeout: NodeJS.Timeout | null = null; // 定时器
+let closeTimeout: NodeJS.Timeout | null = null; // 定时器
+const historyPopup = ref<HTMLElement | null>(null); // 历史记录弹窗引用
+
+// Load history from local storage on component mount
+if (localStorage.getItem('jsonHistory')) {
+  history.value = JSON.parse(localStorage.getItem('jsonHistory')!);
+  filteredHistory.value = history.value; // 初始化过滤后的历史记录
+}
+
+// Watch for changes in inputJson and save to local storage
+const saveToHistory = (newJson: string) => {
+  if (newJson.trim()) {
+    const id = generateUniqueId(newJson);
+    const existingIndex = history.value.findIndex(item => item.id === id);
+    if (existingIndex === -1) {
+      history.value.unshift({ id, json: newJson });
+    } else {
+      // Move the existing item to the top
+      const [existingItem] = history.value.splice(existingIndex, 1);
+      history.value.unshift(existingItem);
+    }
+    localStorage.setItem('jsonHistory', JSON.stringify(history.value));
+    filteredHistory.value = history.value; // 更新过滤后的历史记录
+  }
+};
 
 // 格式化 JSON 的方法
 const formatJson = () => {
@@ -120,6 +188,84 @@ const copyToClipboard = (text: string) => {
     console.error('Copy fail:', err);
   });
 };
+
+// 选择历史记录的函数
+const selectHistory = (item: { id: string, json: string }) => {
+  inputJson.value = item.json;
+  formatJson(); // 更新格式化后的 JSON
+  // Move the selected item to the top
+  const existingIndex = history.value.findIndex(historyItem => historyItem.id === item.id);
+  if (existingIndex !== -1) {
+    const [existingItem] = history.value.splice(existingIndex, 1);
+    history.value.unshift(existingItem);
+    localStorage.setItem('jsonHistory', JSON.stringify(history.value));
+    filteredHistory.value = history.value; // 更新过滤后的历史记录
+  }
+  // 设置定时器，三秒后关闭历史记录列表
+  if (closeTimeout) {
+    clearTimeout(closeTimeout);
+  }
+  closeTimeout = setTimeout(() => {
+    showHistory.value = false;
+  }, 3000);
+};
+
+// 移除历史记录的函数
+const removeHistory = (index: number) => {
+  history.value.splice(index, 1);
+  localStorage.setItem('jsonHistory', JSON.stringify(history.value));
+  filteredHistory.value = history.value; // 更新过滤后的历史记录
+};
+
+// 输入事件处理函数
+const onInput = () => {
+  formatJson();
+  if (inputTimeout) {
+    clearTimeout(inputTimeout);
+  }
+  inputTimeout = setTimeout(() => {
+    saveToHistory(inputJson.value);
+  }, 5000); // 5秒后保存到历史记录
+};
+
+// 过滤历史记录的函数
+const filterHistory = () => {
+  const query = searchQuery.value.toLowerCase();
+  filteredHistory.value = history.value.filter(item => item.json.toLowerCase().includes(query));
+};
+
+// 切换历史记录显示
+const toggleHistory = (event: MouseEvent) => {
+  event.stopPropagation(); // 阻止事件冒泡
+  showHistory.value = !showHistory.value;
+  if (showHistory.value && closeTimeout) {
+    clearTimeout(closeTimeout); // 打开历史记录时清除定时器
+  }
+};
+
+// 处理点击外部事件
+const handleClickOutside = (event: MouseEvent) => {
+  if (historyPopup.value && !historyPopup.value.contains(event.target as Node)) {
+    showHistory.value = false;
+  }
+};
+
+// 设置历史记录列表的最大高度
+const setMaxHistoryHeight = () => {
+  maxHistoryHeight.value = window.innerHeight - 100; // 设置最大高度为窗口高度减去一定的偏移量
+};
+
+// 添加和移除全局点击事件监听器
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+  window.addEventListener('resize', setMaxHistoryHeight);
+  setMaxHistoryHeight(); // 初始化设置最大高度
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside);
+  window.removeEventListener('resize', setMaxHistoryHeight);
+});
 </script>
 
 <style>
