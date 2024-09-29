@@ -92,6 +92,12 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
 
+// 定义历史记录项的类型
+interface HistoryItem {
+  id: string;
+  json: string;
+}
+
 // Helper function to generate a unique identifier
 const generateUniqueId = (json: string) => {
   return btoa(json.replace(/\s+/g, '')); // Base64 encode the JSON string without spaces
@@ -104,9 +110,9 @@ const showSchema = ref(false); // 控制显示 JSON Schema
 const showCopyButton = ref(false); // 控制复制按钮的显示
 const showCopySuccess = ref(false); // 控制复制成功提示的显示
 const showHistory = ref(false); // 控制历史记录的显示
-const history = ref([]); // 历史记录
+const history = ref<HistoryItem[]>([]); // 历史记录
 const searchQuery = ref(''); // 搜索查询
-const filteredHistory = ref([]); // 过滤后的历史记录
+const filteredHistory = ref<HistoryItem[]>([]); // 过滤后的历史记录
 const maxHistoryHeight = ref(0); // 历史记录列表的最大高度
 let inputTimeout: NodeJS.Timeout | null = null; // 定时器
 let closeTimeout: NodeJS.Timeout | null = null; // 定时器
@@ -114,13 +120,14 @@ const historyPopup = ref<HTMLElement | null>(null); // 历史记录弹窗引用
 
 // Load history from local storage on component mount
 if (localStorage.getItem('jsonHistory')) {
-  history.value = JSON.parse(localStorage.getItem('jsonHistory')!);
+  history.value = JSON.parse(localStorage.getItem('jsonHistory')!) as HistoryItem[];
   filteredHistory.value = history.value; // 初始化过滤后的历史记录
 }
 
 // Watch for changes in inputJson and save to local storage
 const saveToHistory = (newJson: string) => {
-  if (newJson.trim()) {
+  try {
+    JSON.parse(newJson.trim()); // 尝试解析 JSON，如果解析失败则抛出错误
     const id = generateUniqueId(newJson);
     const existingIndex = history.value.findIndex(item => item.id === id);
     if (existingIndex === -1) {
@@ -132,6 +139,9 @@ const saveToHistory = (newJson: string) => {
     }
     localStorage.setItem('jsonHistory', JSON.stringify(history.value));
     filteredHistory.value = history.value; // 更新过滤后的历史记录
+  } catch (error) {
+    // 如果 JSON 解析失败，则不保存到历史记录
+    console.error('Invalid JSON, not saving to history:', error);
   }
 };
 
@@ -190,7 +200,7 @@ const copyToClipboard = (text: string) => {
 };
 
 // 选择历史记录的函数
-const selectHistory = (item: { id: string, json: string }) => {
+const selectHistory = (item: HistoryItem) => {
   inputJson.value = item.json;
   formatJson(); // 更新格式化后的 JSON
   // Move the selected item to the top
