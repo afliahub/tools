@@ -6,12 +6,18 @@
     </div>
     
     <div class="flex flex-row flex-grow">
-      <div class="w-1/2 h-full p-2 border border-gray-300 rounded relative">
+      <div class="w-1/2 h-full p-2 border border-gray-300 rounded relative flex">
+        <!-- 行号显示 -->
+        <div class="line-numbers bg-gray-200 text-gray-700 p-2 text-right">
+          <pre>{{ lineNumbers }}</pre>
+        </div>
         <textarea
           v-model="inputJson"
           @input="onInput"
-          class="w-full h-full p-2  rounded resize-none" 
+          @scroll="syncScroll"
+          class="w-full h-full p-2 rounded resize-none" 
           placeholder="Paste your JSON..."
+          ref="textarea"
         ></textarea>
         <!-- 查看历史按钮 -->
         <button 
@@ -22,31 +28,46 @@
         </button>
       </div> 
       <div 
-        class="w-1/2 h-full p-2 border border-gray-300 rounded bg-gray-100 overflow-hidden ml-1 relative"
+        class="w-1/2 h-full p-2 border border-gray-300 rounded bg-gray-100 overflow-hidden ml-1 relative flex"
         @mouseenter="showCopyButton = true" 
         @mouseleave="showCopyButton = false"
       >
-
-      <div class="flex justify-end mb-4 absolute top-2 right-1 mx-auto z-10">
-        <!-- Switch to toggle between formatted JSON and JSON Schema -->
-        <button 
-          @click="showSchema = false" 
-          :class="{'bg-blue-500 text-white': !showSchema, 'bg-gray-200 text-gray-800': showSchema}" 
-          class="px-4 py-2 rounded-l-md focus:outline-none"
-        >
-          JSON
-        </button>
-        <button 
-          @click="showSchema = true" 
-          :class="{'bg-blue-500 text-white': showSchema, 'bg-gray-200 text-gray-800': !showSchema}" 
-          class="px-4 py-2 rounded-r-md focus:outline-none"
-        >
-          Schema
-        </button>
-      </div>
-        <pre v-if="showSchema" class="whitespace-pre-wrap top-1">{{ generateSchema(inputJson) }}</pre>
-        <pre v-else-if="formattedJson" class="whitespace-pre-wrap">{{ formattedJson }}</pre>
-        <p v-else class="text-red-500">{{ errorMessage }}</p>
+        <!-- 行号显示 -->
+        <div class="line-numbers bg-gray-200 text-gray-700 p-2 text-right">
+          <pre>{{ outputLineNumbers }}</pre>
+        </div>
+        <div class="flex flex-col w-full">
+          <div class="absolute top-2 right-2 flex">
+            <!-- Switch to toggle between formatted JSON and JSON Schema -->
+            <button 
+              @click="showSchema = false" 
+              :class="{'bg-blue-500 text-white': !showSchema, 'bg-gray-200 text-gray-800': showSchema}" 
+              class="px-4 py-2 rounded-l-md focus:outline-none"
+            >
+              JSON
+            </button>
+            <button 
+              @click="showSchema = true" 
+              :class="{'bg-blue-500 text-white': showSchema, 'bg-gray-200 text-gray-800': !showSchema}" 
+              class="px-4 py-2 rounded-r-md focus:outline-none"
+            >
+              Schema
+            </button>
+          </div>
+          <pre 
+            v-if="showSchema" 
+            class="whitespace-pre top-1 w-full p-2 overflow-x-auto" 
+            ref="outputPre"
+            @scroll="syncOutputScroll"
+          >{{ generateSchema(inputJson) }}</pre>
+          <pre 
+            v-else-if="formattedJson" 
+            class="whitespace-pre w-full p-2 overflow-x-auto" 
+            ref="outputPre"
+            @scroll="syncOutputScroll"
+          >{{ formattedJson }}</pre>
+          <p v-else class="text-red-500">{{ errorMessage }}</p>
+        </div>
 
         <!-- 复制按钮 -->
         <button 
@@ -90,7 +111,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 
 // 定义历史记录项的类型
 interface HistoryItem {
@@ -114,15 +135,32 @@ const history = ref<HistoryItem[]>([]); // 历史记录
 const searchQuery = ref(''); // 搜索查询
 const filteredHistory = ref<HistoryItem[]>([]); // 过滤后的历史记录
 const maxHistoryHeight = ref(0); // 历史记录列表的最大高度
+const lineNumbers = ref('1'); // 输入框行号
+const outputLineNumbers = ref('1'); // 输出框行号
 let inputTimeout: NodeJS.Timeout | null = null; // 定时器
 let closeTimeout: NodeJS.Timeout | null = null; // 定时器
 const historyPopup = ref<HTMLElement | null>(null); // 历史记录弹窗引用
+const textarea = ref<HTMLTextAreaElement | null>(null); // 文本区域引用
+const outputPre = ref<HTMLElement | null>(null); // 输出区域引用
 
 // Load history from local storage on component mount
 if (localStorage.getItem('jsonHistory')) {
   history.value = JSON.parse(localStorage.getItem('jsonHistory')!) as HistoryItem[];
   filteredHistory.value = history.value; // 初始化过滤后的历史记录
 }
+
+// Watch for changes in inputJson and update line numbers
+watch(inputJson, (newValue) => {
+  const lines = newValue.split('\n').length;
+  lineNumbers.value = Array.from({ length: lines }, (_, i) => i + 1).join('\n');
+});
+
+// Watch for changes in formattedJson and update output line numbers
+watch([formattedJson, showSchema], () => {
+  const output = showSchema.value ? generateSchema(inputJson.value) : formattedJson.value;
+  const lines = output.split('\n').length;
+  outputLineNumbers.value = Array.from({ length: lines }, (_, i) => i + 1).join('\n');
+});
 
 // Watch for changes in inputJson and save to local storage
 const saveToHistory = (newJson: string) => {
@@ -189,7 +227,8 @@ const generateJsonSchema = (obj: any) => {
 
 // 复制到剪贴板的函数
 const copyToClipboard = (text: string) => {
-  navigator.clipboard.writeText(text).then(() => {
+  const textToCopy = text.split('\n').map(line => line.trim()).join('\n'); // 去掉行号部分
+  navigator.clipboard.writeText(textToCopy).then(() => {
     showCopySuccess.value = true; // 显示复制成功提示
     setTimeout(() => {
       showCopySuccess.value = false; // 三秒后隐藏提示
@@ -236,6 +275,28 @@ const onInput = () => {
   inputTimeout = setTimeout(() => {
     saveToHistory(inputJson.value);
   }, 5000); // 5秒后保存到历史记录
+};
+
+// 同步滚动
+const syncScroll = () => {
+  if (textarea.value) {
+    const scrollTop = textarea.value.scrollTop;
+    const lineNumbersElement = document.querySelector('.line-numbers');
+    if (lineNumbersElement) {
+      lineNumbersElement.scrollTop = scrollTop;
+    }
+  }
+};
+
+// 同步输出滚动
+const syncOutputScroll = () => {
+  if (outputPre.value) {
+    const scrollTop = outputPre.value.scrollTop;
+    const lineNumbersElement = document.querySelectorAll('.line-numbers')[1];
+    if (lineNumbersElement) {
+      lineNumbersElement.scrollTop = scrollTop;
+    }
+  }
 };
 
 // 过滤历史记录的函数
@@ -298,5 +359,13 @@ pre {
 }
 .pointer-events-none {
   pointer-events: none; /* 禁用水印的鼠标事件 */
+}
+
+/* 行号样式 */
+.line-numbers {
+  user-select: none;
+  text-align: right;
+  padding-right: 10px;
+  border-right: 1px solid #ccc;
 }
 </style>
