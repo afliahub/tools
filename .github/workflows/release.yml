@@ -152,21 +152,32 @@ jobs:
       - name: List files for debugging
         run: ls -R dist/
 
-      - name: Generate changelog
-        id: generate_changelog
-        run: |
-          npx conventional-changelog-cli -p angular -i CHANGELOG.md -s
-          CHANGELOG=$(cat CHANGELOG.md)
-          echo "CHANGELOG<<EOF" >> $GITHUB_ENV
-          echo "$CHANGELOG" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
+      
       - name: Get contributors
         id: get_contributors
         run: |
           CONTRIBUTORS=$(git shortlog -sne HEAD | awk '{for (i=2; i<NF-1; i++) printf $i " "; print $(NF-1)}')
           echo "CONTRIBUTORS<<EOF" >> $GITHUB_ENV
           echo "$CONTRIBUTORS" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Extract version from latest tag
+        id: extract_latest_version
+        shell: bash
+        run: |
+          latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+          version=${latest_tag#v}
+          echo "Latest tag is $latest_tag"
+          echo "Version without 'v': $version"
+          echo "VERSION=$version" >> $GITHUB_ENV
+          
+      - name: Generate changelog
+        id: generate_changelog
+        run: |
+          npx conventional-changelog-cli -p angular -i CHANGELOG.md -s --release-as ${{ env.VERSION }}
+          CHANGELOG=$(cat CHANGELOG.md)
+          echo "CHANGELOG<<EOF" >> $GITHUB_ENV
+          echo "$CHANGELOG" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
       - name: Publish to GitHub Releases
